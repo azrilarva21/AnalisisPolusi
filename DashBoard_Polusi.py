@@ -3,13 +3,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import streamlit as st
 import folium
-from streamlit_folium import folium_static
+from streamlit_folium import folium_static 
 from scipy.stats.mstats import winsorize
 from sklearn.cluster import KMeans
 import numpy as np
 
 # Load dataset
-file_path = "PRSA_Data_Guanyuan_20130301-20170228.csv"
+file_path = "dataset_hasil.csv"
 df = pd.read_csv(file_path)
 
 # Membersihkan data (Clearing data)
@@ -21,15 +21,15 @@ df[cuaca_cols] = df[cuaca_cols].fillna(df[cuaca_cols].mean())
 
 df["wd"] = df["wd"].fillna(df["wd"].mode()[0])
 
-# Menggabungkan kolom year, month, day, hour menjadi satu kolom datetime
-df["datetime"] = pd.to_datetime(df[["year", "month", "day", "hour"]])
-
-# Menghapus kolom yang tidak diperlukan
-df.drop(columns=["year", "month", "day", "hour"], inplace=True)
-
 # Winsorizing untuk outlier
 df[polusi_cols] = df[polusi_cols].apply(lambda x: winsorize(x, limits=[0.01, 0.01]))
 df[cuaca_cols] = df[cuaca_cols].apply(lambda x: winsorize(x, limits=[0.01, 0.01]))
+
+# Konversi datetime jika masih dalam format string
+df["datetime"] = pd.to_datetime(df["datetime"], errors='coerce')
+
+# Cek apakah konversi berhasil
+print(df["datetime"].dtype)  # Harusnya output 'datetime64[ns]'
 
 # Rata-rata polusi harian
 df["date"] = df["datetime"].dt.date
